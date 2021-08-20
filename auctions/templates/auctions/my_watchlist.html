@@ -1,0 +1,26 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <h3>My Watchlist</h3>
+    <p>In this page, you can take a look at all of the listings that you have added to your watchlist.</p>
+    
+    <div class="container">
+      <div class="row">
+        {% for listing in listings %}
+          <div class = "col" style = "padding:20px;">
+            <div class="card" style="width: 18rem;">
+                <img src="{{ MEDIA_URL }}/media/{{ listing.url }}" class="card-img-top" alt="listing image">
+                <div class="card-body">
+                  <h5 class="card-title">{{ listing.title }}</h5>
+                  <p class="card-text" style = "font-size:9px;">{{ listing.description }}</p>
+                  <a href="{% url 'info' listing.title %}" class="btn btn-primary">More info</a>
+                </div>
+            </div>
+          </div>
+        {% empty %}
+        You have not added any listings to your watchlist.
+        {% endfor %}
+      </div>
+    </div>
+          
+{%  endblock %}

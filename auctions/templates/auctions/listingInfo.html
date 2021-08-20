@@ -1,0 +1,170 @@
+{% extends 'auctions/layout.html' %}
+{% load static %}
+{% load humanize %}
+
+
+{% block body %}
+    {% if message %}
+    {% for message in messages %}
+    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Holy guacamole!</strong> {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+    {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <h4 class="alert-heading">Well done!</h4>
+            <p>{{ message }}</p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+        </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    <h2>{{ listing.title }}<span class = "badge badge-secondary badge-pill">{{ listing.category }}</span></h2>
+    <p class = "fs-6 fw-lighter text-muted" style = "font-size:12px;">Posted on {{ listing.timestamp }} by <span class="badge badge-dark">{{ listing.author }}</span></p>
+    <p style = "font-size: 12px; color:black;">{{ listing.description }}</p>
+    <p>Starting bid: {{ listing.starting_bid|intcomma }} US$. </p>
+
+    {% if listing.watchlist_status == "Remove from watchlist" %}
+    <div class = "container">
+        <div class = "row align-items-center">
+            <div class = "col-md-auto align-self-center" style = "display:flex; justify-content: left;">
+                <img src = "{% static 'auctions/eyeIcon.png' %}" style = "width:30px;">
+            </div>
+            <div class = "col-md-auto" style = "display:flex; justify-content:left;">
+                <span class = "fs-6 fw-lighter text-muted" style = "font-size:9px;">Already in your watchlist.</span>
+            </div>
+            <div class = "col-md-auto">
+                <form action = "{% url 'watchlist' listing.title %}" method = "post">
+                    {% csrf_token %}
+                    <input type = "submit" class="btn btn-primary" value = "{{ listing.watchlist_status }}" name = "status">
+                </form>
+            </div>
+            {% if listing.author == user %}
+            <div class = "col-2">
+                <form action = "{% url 'close' listing.title %}" method = "post">
+                    {% csrf_token %}
+                    <input type = "submit" class = "btn btn-danger" value = "Close Listing">
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% else %}
+    <div class = "container">
+        <div class = "row">
+            {% if listing.status == 'Active' %}
+            <div class = "col-md-auto">
+                <form action = "{% url 'watchlist' listing.title %}" method = "post">
+                    {% csrf_token %}
+                    <input type = "submit" class="btn btn-primary" value = "{{ listing.watchlist_status }}" name = "status">
+                </form>
+            </div>
+            {% endif %}
+            {% if listing.author == user %}
+            <div class = "col-9">
+                {% if listing.status == 'Active' %}
+                <form action = "{% url 'close' listing.title %}" method = "post">
+                    {% csrf_token %}
+                    <input type = "submit" class = "btn btn-danger" value = "Close Listing">
+                </form>
+                {% else %}
+                <form action = "{% url 'activate' listing.title %}" method = "post">
+                    {% csrf_token %}
+                    <input type = "submit" class = "btn btn-success" value = "Open Listing">
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if listing.status == 'Active' %}
+    <div class = "container" style ="display:flex;margin:25px;border-style:solid;border-color:lightsteelblue;border-radius:25px;border-width: 2px;width:900px;">
+        <div class = "row">
+            <div class = "col">
+                <div class="text-center">
+                    <img src="{{ MEDIA_URL }}/media/{{ listing.url }}" class="rounded" alt="listing image" width = "600" style = "padding:30px;">
+                </div>
+            </div>
+            <div class = "col" style = "margin:25px;">
+                <p class = "font-weight-bold font-italic text-dark">{{ listing.title }}</p>
+                <p><small>Starting bid: <span>{{ listing.starting_bid|intcomma }} US$</span></small></p>
+                <p><small>Current bid: <span>{{ listing.current_bid|intcomma }} US$</span></small></p>
+                <hr>
+                <form action = "{% url 'newBid' listing.title %}" method = "post">
+                    {% csrf_token %}
+                    {{ bidform.as_p }}
+                    <input type = "submit" value = "BID!">
+                </form>
+
+            </div>
+        </div>
+    </div>
+    {% else %}
+        {% if listing.winner == user %}
+        <br>
+        <br>
+        <br>
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading"><img src = "{% static 'auctions/winnerIcon.png' %}" style = "width:30px;">CONGRATULATIONS!</h4>
+            <p>Your bid has been the highest bid this listing received, and now that it is closed, you have been declared the winner! Claim your prize.</p>
+        </div>
+        {% endif %}
+        <br>
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Listing closed.</h4>
+            <p style = "color:red;">Sorry, this listing has been closed by the original poster. </p>
+            <hr>
+            <p class="mb-0" style = "color:red;">Be sure to check out our other listings!</p>
+        </div>
+        <br>
+        <br>
+        <br>
+    {% endif %}
+
+    <h3>Comment Section</h3>
+
+    <p>Post a Comment:</p>
+    
+    <form action = "{% url 'info' listing.title %}" method = "post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input class="btn btn-info" type = "submit" value = "Post Comment">
+    </form>
+    <br>
+        <table class = "table" style = "max-width: 1600px; table-layout: fixed;">
+            <thead>
+            </thead>
+            <tbody>
+                {% for comment in comments %}
+                <tr>
+                    <td>
+                        <div class = "container">
+                            <div class = "row">
+                                <div class = "col-sm">
+                                    <img src = "{% static 'auctions/commentIcon.png' %}" style = "width:30px;">
+                                </div>
+                                <div class = "col-11">
+                                    {{ comment.content }}
+                                    <p class = "fs-6 fw-lighter text-muted" style = "font-size:10px;">Posted on {{ comment.date }} by <span class="badge badge-dark">{{ comment.user }}.</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td>No comments yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+{% endblock %}

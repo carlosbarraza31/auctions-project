@@ -1,0 +1,20 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+    <h3>Categories</h3>
+    <p>In this page, you can take a look at all the available listing categories. You can click on a category to be taken to a page displaying all listings pertaining to that specific category.</p>
+    <br>
+
+    <div class = "container">
+        <div class = "row">
+            {% for category in categories %}
+                <div class = "col-4" style = "padding:30px;margin: 0 auto;">
+                    <span class = "badge badge-secondary" style = "padding:20px;font-size: 30px;"><a href = "{% url 'category_listings' category %}">{{ category }}</a></span>
+                </div>
+            {% empty %}
+            No categories available.
+            {% endfor %}
+ 
+        </div>
+    </div>
+{% endblock %}

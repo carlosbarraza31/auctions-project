@@ -1,0 +1,43 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>All Listings</h2>
+    <table class = "table table-striped" style = "max-width: 1600px; table-layout: fixed;">
+        <thead>
+            <tr>
+                <th scope = "col" style = "width:100px;">Auction Image</th>
+                <th scope = "col" style = "width:100px;">Title</th>
+                <th scope = "col" style = "width:150px;">Description</th>
+                <th scope = "col" style = "width:50px;">Current Price (US$)</th>
+                <th scope = "col" style = "width:50px;">Category</th>
+                <th scope = "col" style = "width:50px;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for listing in listings %}
+                <tr>
+                    <td style="width:100px;"><img src = "{{ MEDIA_URL }}/media/{{ listing.url }}" width = "150" style = "padding:30px;"></td>
+                    <td>
+                        <a href = "{% url 'info' listing.title %}">{{ listing.title }}</a>
+                        <p class = "fs-6 fw-lighter text-muted" style = "font-size:12px;"> Posted on {{ listing.timestamp }} by <span class="badge badge-dark">{{ listing.author }}.</span></p>
+                    </td>
+                    <td style = "font-size:9px;">{{ listing.description }}</td>
+                    <td style = "width:20px;">{{ listing.current_bid }}</td>
+                    <td style="width:20px;">{{ listing.category }}</td>
+                    {% if listing.status == 'Active' %}
+                    <td><span class="badge badge-secondary badge-success">{{ listing.status }}</span></td>
+                    {% else %}}
+                    <td><span class="badge badge-secondary">{{ listing.status }}</span></td>
+                    {% endif %}
+
+                </tr>
+            {% empty %}
+                <tr>
+                    <td>No Listings. </td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+
+{% endblock %}
